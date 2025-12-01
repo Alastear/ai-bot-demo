@@ -106,21 +106,26 @@ export default function AIChat() {
       <Flex>
         <SidebarAI />
 
-        <Flex flex="1" direction="column" p={6} minH="calc(100vh - 64px)">
+        <Flex
+          flex="1"
+          direction="column"
+          p={6}
+          // 👇 เปลี่ยนเป็น h เพื่อกำหนดความสูงแน่นอน
+          h="calc(100vh - 64px)" // 100vh - ความสูงของ Navbar (สมมติ 64px)
+          position="relative" // เพื่อให้ Box ของ input bar วางตำแหน่งได้ง่าย
+        >
           {/* Chat container */}
           <Box
             ref={chatContainerRef}
-            flex="1"
+            flex="1" // ขยายเต็มพื้นที่ที่เหลือ
             overflowY="auto"
-            p={4}
             mb={4}
+            p={4}
             bg="gray.50"
             borderRadius="md"
             boxShadow="sm"
-            display="flex"
-            flexDirection="column"
           >
-            <VStack spacing={4} align="stretch" flex="1">
+            <VStack spacing={4} align="stretch">
               {messages.map((msg: any) => (
                 <Box
                   key={msg.id}
@@ -135,13 +140,17 @@ export default function AIChat() {
                   wordBreak="break-word"
                 >
                   {msg.type === "link" ? (
-                    <ChakraLink
+                    <a
                       href={msg.content}
-                      color={msg.role === "user" ? "white" : "blue.600"}
-                      isExternal
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: msg.role === "user" ? "white" : "blue",
+                        textDecoration: "underline",
+                      }}
                     >
                       {msg.content}
-                    </ChakraLink>
+                    </a>
                   ) : (
                     msg.content
                   )}
@@ -150,23 +159,25 @@ export default function AIChat() {
             </VStack>
           </Box>
 
-          {/* Input bar */}
-          <HStack spacing={2}>
-            <Input
-              placeholder="พิมพ์ข้อความ..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") sendMessage();
-              }}
-            />
-            <Button colorScheme="blue" onClick={sendMessage}>
-              ส่ง
-            </Button>
-          </HStack>
+          {/* Input bar ติดด้านล่าง */}
+          <Box>
+            <HStack>
+              <Input
+                placeholder="พิมพ์ข้อความ..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") sendMessage();
+                }}
+              />
+              <Button colorScheme="blue" onClick={sendMessage}>
+                ส่ง
+              </Button>
+            </HStack>
+          </Box>
         </Flex>
 
       </Flex>
-    </Box>
+    </Box >
   );
 }
