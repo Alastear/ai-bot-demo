@@ -107,12 +107,13 @@ export default function AIChat() {
         <SidebarAI />
 
         <Flex flex="1" direction="column" p={6} minH="calc(100vh - 64px)">
+          {/* Chat container */}
           <Box
             ref={chatContainerRef}
             flex="1"
             overflowY="auto"
-            mb={4}
             p={4}
+            mb={4}
             bg="gray.50"
             borderRadius="md"
             boxShadow="sm"
@@ -149,7 +150,8 @@ export default function AIChat() {
             </VStack>
           </Box>
 
-          <HStack>
+          {/* Input bar */}
+          <HStack spacing={2}>
             <Input
               placeholder="พิมพ์ข้อความ..."
               value={input}
@@ -163,6 +165,7 @@ export default function AIChat() {
             </Button>
           </HStack>
         </Flex>
+
       </Flex>
     </Box>
   );
