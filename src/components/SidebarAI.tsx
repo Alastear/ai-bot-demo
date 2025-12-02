@@ -1,6 +1,7 @@
 // components/SidebarAI.tsx
-import { Box, VStack, Text, Select, Button, Divider } from "@chakra-ui/react";
-
+import { Box, VStack, Text, Select, Button, Divider, Flex } from "@chakra-ui/react";
+import { IoCalendarOutline } from "react-icons/io5";
+import { BiHome } from "react-icons/bi";
 const SidebarAI = () => {
     // Mock AI models
     const aiModels = ["General AI", "HR Care", "Product Expert", "Market Expert"];
@@ -31,6 +32,63 @@ const SidebarAI = () => {
         </Box> */}
 
                 {/* New Chat Button */}
+                <Flex
+                    flex="1" // 💡 1. ขยาย Flex ให้เต็มความกว้างที่เหลือ
+                    align="center"
+                    justifyContent="center" // 💡 2. จัดวางเนื้อหา (ไอคอน) ให้อยู่ตรงกลางแนวนอน
+                    mb={4}
+                    gap={6}
+                // เพิ่มความกว้างขั้นต่ำ (minW) ถ้าจำเป็น เพื่อให้แน่ใจว่า Flex มีพื้นที่ให้ขยาย
+                // minW="100%" 
+                >
+                    <Box
+                        p={2} // Padding รอบไอคอน
+                        borderRadius="full" // ทำให้เป็นวงกลม
+                        transition="all 0.2s ease-in-out" // 💡 ทำให้การเปลี่ยนสีและเงาไหลลื่น
+                        cursor="pointer"
+                        // 🎨 Drop Shadow และสีปกติ
+                        boxShadow="md"
+                        bg="white"
+                        onClick={() => window.location.href = "/"}
+                        _hover={{
+                            // 💡 Hover Effects
+                            color: "purple.600", // เปลี่ยนสีไอคอนเป็นสีม่วง
+                            boxShadow: "lg", // ทำให้เงาเข้มขึ้น
+                            transform: "translateY(-2px)", // ยกไอคอนขึ้นเล็กน้อย
+                            bg: "blue.50", // พื้นหลังสีอ่อน
+                        }}
+                    >
+                        <BiHome
+                            size={32}
+                            color="#174376ff" // สีเริ่มต้นของไอคอน
+                        // 💡 **สำคัญ**: ลบ cursor="pointer" และ color ออกจาก Icon เพราะ Box จัดการแล้ว
+                        />
+                    </Box>
+
+                    {/* ไอคอน IoCalendarOutline */}
+                    <Box
+                        p={2}
+                        borderRadius="full"
+                        transition="all 0.2s ease-in-out"
+                        cursor="pointer"
+                        // 🎨 Drop Shadow และสีปกติ
+                        boxShadow="md"
+                        bg="white"
+                        onClick={() => window.location.href = "#"}
+                        _hover={{
+                            // 💡 Hover Effects
+                            color: "purple.600",
+                            boxShadow: "lg",
+                            transform: "translateY(-2px)",
+                            bg: "blue.50",
+                        }}
+                    >
+                        <IoCalendarOutline
+                            size={32}
+                            color="#174376ff" // สีเริ่มต้นของไอคอน
+                        />
+                    </Box>
+                </Flex>
                 <Button bgGradient="linear(to-r, blue.800, purple.600)" transition="all 0.3s ease" _hover={{ bgGradient: "linear(to-r, blue.600, purple.400)" }} size="sm" w="full" textColor="white" onClick={() => window.location.href = "/ai-assistant"}>
                     New Chat
                 </Button>
