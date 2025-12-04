@@ -28,7 +28,7 @@ import {
 import Navbar from "../components/Navbar";
 // ใช้ WarningIcon สำหรับสถานะว่างทุกคน/ว่างบางส่วน
 import { AddIcon, ChevronLeftIcon, ChevronRightIcon, WarningIcon, CloseIcon, TimeIcon, CalendarIcon } from "@chakra-ui/icons";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { HamburgerIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
 import { REAL_SCHEDULE_DATA, ScheduleItem } from "../utils/mockData";
@@ -40,6 +40,8 @@ import { REAL_SCHEDULE_DATA, ScheduleItem } from "../utils/mockData";
 // ข้อมูล Schedule List จริง (อัปเดตจากผู้ใช้)
 
 // MOCK: รายชื่อผู้เข้าร่วมที่เป็นไปได้
+const LOCKED_PARTICIPANT = 'piriwat';
+
 const MOCK_ALL_PARTICIPANTS = [
   'piriwat',
   'partner1',
@@ -51,8 +53,8 @@ const MOCK_ALL_PARTICIPANTS = [
   'วีระศักดิ์',
   'กรต',
 ];
+const MOCK_SELECTED_PARTICIPANTS = [LOCKED_PARTICIPANT]; // 👈 UPDATED: ใช้ตัวแปรที่ถูกล็อก
 // MOCK: ตั้งต้นที่ piriwat เพื่อทดสอบสถานะ Partial
-const MOCK_SELECTED_PARTICIPANTS = ['piriwat'];
 
 type DayStatus = 'ALL_AVAILABLE' | 'PARTIAL_AVAILABLE' | 'NONE_AVAILABLE' | 'DEFAULT' | string;
 
@@ -61,16 +63,14 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const TODAY = new Date(2025, 11, 3, 0, 0, 0, 0); // 3 ธ.ค. 2025 
+const TODAY = new Date();
 
 // ------------------- Calendar Logic Functions (Unchanged) -------------------
 
 /**
  * ฟังก์ชันช่วยแปลง ISO 8601 UTC string เป็น Local Date (GMT+7)
  */
-const getLocalDateFromISO = (isoString: string): Date => {
-  return new Date(isoString);
-};
+
 
 /**
  * คำนวณสถานะความว่างของวันนั้นๆ สำหรับผู้เข้าร่วมที่เลือกทั้งหมด
@@ -428,18 +428,25 @@ const CalendarDayBox = ({ date, status, events, isCurrentMonth, isToday, isPast,
 
 // ------------------- ParticipantBadge Component (Unchanged) -------------------
 
+// pages/schedule-meeting.tsx
+
+// ... (โค้ดก่อนหน้า)
+
+// ------------------- ParticipantBadge Component (UPDATED) -------------------
+
 interface ParticipantBadgeProps {
   email: string;
   onRemove: (email: string) => void;
+  isLocked: boolean; // 👈 NEW PROP: สถานะการล็อก
 }
 
-const ParticipantBadge = ({ email, onRemove }: ParticipantBadgeProps) => {
+const ParticipantBadge = ({ email, onRemove, isLocked }: ParticipantBadgeProps) => {
   const displayLabel = email;
 
   return (
     <Badge
       variant="solid"
-      colorScheme="blue"
+      colorScheme={isLocked ? "blackAlpha" : "blue"} // 👈 UPDATED: เปลี่ยนสีเป็นสีแดงเมื่อถูกล็อก
       fontSize="sm"
       px={2}
       py={1}
@@ -449,17 +456,22 @@ const ParticipantBadge = ({ email, onRemove }: ParticipantBadgeProps) => {
       mt={1}
     >
       <HStack spacing={1}>
-        <Text>{displayLabel}</Text>
-        <CloseButton
-          size="sm"
-          onClick={() => onRemove(email)}
-          _hover={{ bg: 'blue.600' }}
-          color="white"
-        />
+        <Text>{displayLabel} {isLocked && ""}</Text> {/* 👈 UPDATED: เพิ่มสัญลักษณ์ล็อก */}
+        {/* 👈 UPDATED: ซ่อน CloseButton หากถูกล็อก */}
+        {!isLocked && (
+          <CloseButton
+            size="sm"
+            onClick={() => onRemove(email)}
+            _hover={{ bg: 'blue.600' }}
+            color="white"
+          />
+        )}
       </HStack>
     </Badge>
   );
 };
+
+// ... (โค้ดก่อนหน้า)
 
 
 // ------------------- ScheduleMeeting Component -------------------
@@ -472,6 +484,37 @@ export default function ScheduleMeeting() {
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth(); // 0-11
+
+  useEffect(() => {
+    // 1. ตรวจสอบว่ามี query parameter 'participants' หรือไม่
+    const participantsQuery = router.query.participants;
+
+    if (participantsQuery) {
+      // 2. ถ้ามี: แปลงสตริงกลับเป็น Array of string
+      let participantsArray: string[];
+      if (Array.isArray(participantsQuery)) {
+        // กรณีที่มี participants ซ้ำกันหลายครั้งใน query (ไม่น่าจะเกิด)
+        participantsArray = participantsQuery.flatMap(p => p.split(','));
+      } else {
+        // กรณีปกติ: "piriwat,partner1,partner2" -> ["piriwat", "partner1", "partner2"]
+        participantsArray = participantsQuery.split(',');
+      }
+
+      // 3. กรองและกำหนดค่าใหม่ให้กับ State
+      // กรองให้แน่ใจว่าทุกคนอยู่ใน MOCK_ALL_PARTICIPANTS และไม่ซ้ำ
+      const validParticipants = [...new Set(
+        participantsArray.filter(p => MOCK_ALL_PARTICIPANTS.includes(p))
+      )];
+
+      // 4. อัปเดต State (เฉพาะเมื่อมีค่าที่แตกต่างจากค่าปัจจุบัน)
+      if (validParticipants.length > 0) {
+        setSelectedParticipants(validParticipants);
+      }
+    } else {
+      // หากไม่มี query parameters (เข้าหน้าครั้งแรก) ให้ใช้ค่า MOCK ตั้งต้น
+      setSelectedParticipants(MOCK_SELECTED_PARTICIPANTS);
+    }
+  }, [router.query.participants]); // 👈 Dependency: ทำงานซ้ำเมื่อ query.participants เปลี่ยนไป
 
   const handleDayClick = (date: Date) => {
     if (selectedParticipants.length === 0) {
@@ -515,11 +558,17 @@ export default function ScheduleMeeting() {
   }, [selectedParticipants, searchTerm]);
 
   const removeParticipant = (emailToRemove: string) => {
+    // 👈 NEW LOGIC: ป้องกันการลบผู้เข้าร่วมที่ถูกล็อก
+    if (emailToRemove === LOCKED_PARTICIPANT) {
+      // สามารถเพิ่ม toast แจ้งเตือนได้ที่นี่
+      console.log(`${LOCKED_PARTICIPANT} cannot be removed.`);
+      return;
+    }
+    // ----------------------------------------
     setSelectedParticipants(prev =>
       prev.filter(email => email !== emailToRemove)
     );
   };
-
 
   const changeMonth = (delta: number) => {
     setCurrentDate(prevDate => {
@@ -687,6 +736,7 @@ export default function ScheduleMeeting() {
                     key={email}
                     email={email}
                     onRemove={removeParticipant}
+                    isLocked={email === LOCKED_PARTICIPANT} // 👈 UPDATED: ส่งสถานะล็อก
                   />
                 ))}
 

@@ -34,6 +34,56 @@ interface CombinedTimeSlot {
     status: 'ALL_AVAILABLE' | 'NONE_AVAILABLE';
 }
 
+const addScheduleItemToMock = (
+    dateString: string,
+    startTimeLocal: string,
+    endTimeLocal: string,
+    participants: string[],
+    meetingName: string = "Meeting: นัดหมายด่วน"
+) => {
+    // Helper function to convert Local Time (HH:MM) on a specific date to ISO 8601 UTC
+    const convertLocalToUTC = (dateStr: string, timeStr: string): string => {
+        const [year, month, day] = dateStr.split('-');
+        const [hour, minute] = timeStr.split(':');
+
+        // สร้าง Date Object ใน Local Time (เพื่อให้ setHours ทำงานบน Timezone ของ Browser)
+        const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+        localDate.setHours(Number(hour), Number(minute), 0, 0);
+
+        // แปลงเป็น ISO 8601 UTC string
+        return localDate.toISOString();
+    };
+
+    // 1. แปลงเวลาเริ่มต้นและสิ้นสุดเป็น ISO 8601 UTC
+    const startUTC = convertLocalToUTC(dateString, startTimeLocal);
+    const endUTC = convertLocalToUTC(dateString, endTimeLocal);
+
+    // 2. หา ID ใหม่ที่มากที่สุด
+    const maxId = REAL_SCHEDULE_DATA.reduce((max, item) => Math.max(max, item.id), 0);
+    const newId = maxId + 1;
+
+    // 3. สร้างรายการนัดหมายใหม่
+    const newScheduleItem: ScheduleItem = {
+        id: newId,
+        type: "Meeting",
+        name: meetingName,
+        start: startUTC,
+        end: endUTC,
+        color: "#1A73E8", // สีน้ำเงินมาตรฐานสำหรับการประชุมใหม่
+        allDay: false,
+        assignee_firstname: participants,
+        department_name: "Scheduled Meeting",
+        license_plate: null
+    };
+
+    // 4. อัปเดต Array (เพิ่ม item เข้าไป)
+    REAL_SCHEDULE_DATA.push(newScheduleItem);
+
+    // 5. (ทางเลือก) log เพื่อยืนยันการอัปเดต
+    console.log(`✅ New meeting scheduled and MOCK data updated (ID: ${newId})`);
+    console.log(newScheduleItem);
+};
+
 /**
  * ฟังก์ชันช่วยแปลง ISO 8601 UTC string เป็น Local Date (GMT+7)
  */
@@ -144,12 +194,12 @@ const TimeSlotButtonPicker = ({ timeSlots, onSelectRange }: TimeSlotButtonPicker
         const slotStatus = timeSlots[index].status;
 
         if (slotStatus === 'NONE_AVAILABLE') {
-        // หากคลิก Slot ที่ไม่ว่าง ให้ยกเลิกการเลือกทั้งหมด
-        setSelectedIndices([]);
-        setMultiSelectStart(null);
-        onSelectRange(null);
-        return; // ออกจากฟังก์ชันหลังจากยกเลิก
-    }
+            // หากคลิก Slot ที่ไม่ว่าง ให้ยกเลิกการเลือกทั้งหมด
+            setSelectedIndices([]);
+            setMultiSelectStart(null);
+            onSelectRange(null);
+            return; // ออกจากฟังก์ชันหลังจากยกเลิก
+        }
 
         if (multiSelectStart !== null) {
             const startIdx = Math.min(multiSelectStart, index);
@@ -378,11 +428,15 @@ export default function SelectTime() {
     const [selectedRange, setSelectedRange] = useState<{ start: string, end: string } | null>(null);
     const [isConfirming, setIsConfirming] = useState(false);
     // Check for missing data
+    // router ส่ง quary กลับ 
+    // get params = router.query;
+    const params = router.query;
+
     if (!dateString || !participantsString) {
         return (
             <Center h="100vh">
                 <Text>Missing schedule data. Please go back and select a date.</Text>
-                <Button onClick={() => router.push('/schedule-meeting')}>Go to Schedule</Button>
+                <Button onClick={() => router.push(`/schedule-meeting?participants=${params.participants}`)}>Go to Schedule</Button>
             </Center>
         );
     }
@@ -418,10 +472,19 @@ export default function SelectTime() {
             });
             return;
         }
+        
 
-        toast({
+        addScheduleItemToMock(
+            dateString as string,
+            selectedRange.start,
+            selectedRange.end,
+            selectedParticipants,
+            "Meeting: นัดหมายใหม่โดย piriwat" // สามารถตั้งชื่อเรื่องได้
+        );
+
+       toast({
             title: "นัดหมายสำเร็จ!",
-            description: `การประชุมถูกกำหนดในวันที่ ${formattedDate} เวลา ${selectedRange.start} ถึง ${selectedRange.end}`,
+            description: `การประชุมถูกกำหนดในวันที่ ${formattedDate} เวลา ${selectedRange.start} ถึง ${selectedRange.end} (ข้อมูล Mock ถูกอัปเดต)`,
             status: "success",
             duration: 7000,
             isClosable: true,
@@ -429,13 +492,14 @@ export default function SelectTime() {
         });
         setIsConfirming(true);
         setTimeout(() => {
-            router.push('/schedule-meeting');
+            // ส่งกลับไปหน้า schedule-meeting พร้อม participants ที่เลือกไว้
+            router.push(`/schedule-meeting?participants=${selectedParticipants.join(',')}`);
         }, 1000);
         // Note: ใน Production, คุณควรส่ง request ไปบันทึกการนัดหมายที่นี่
     };
 
     const handleGoBack = () => {
-        router.back();
+        router.push(`/schedule-meeting?participants=${selectedParticipants.join(',')}`);
     };
 
 
@@ -458,7 +522,7 @@ export default function SelectTime() {
                     _hover={{ borderColor: "blue.500", boxShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.4)", transform: "translateY(-1px)" }}> <Text>กลับสู่หน้าแรก</Text> </Box>
                 {/* Item 2: Schedule Meeting */}
                 <Box
-                    gridColumn={{ base: "auto", md: "1 / span 2" }} p={0} bg="white" borderRadius="md" boxShadow="md" borderColor="gray.200" borderWidth="1px" textAlign="center" padding="4" rounded="full" transition="all 0.3s ease" cursor="pointer" onClick={() => router.push("/schedule-meeting")}
+                    gridColumn={{ base: "auto", md: "1 / span 2" }} p={0} bg="white" borderRadius="md" boxShadow="md" borderColor="gray.200" borderWidth="1px" textAlign="center" padding="4" rounded="full" transition="all 0.3s ease" cursor="pointer" onClick={() => router.push(`/schedule-meeting?participants=${selectedParticipants.join(',')}`)}
                     _hover={{ borderColor: "blue.500", boxShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.4)", transform: "translateY(-1px)" }}> <Text>Schedule Meeting</Text> </Box>
             </Grid>
 
