@@ -1,9 +1,11 @@
-// components/SidebarAI.tsx
-import { Box, VStack, Text, Select, Button, Divider, Flex } from "@chakra-ui/react";
+import { Box, VStack, Text, Select, Button, Divider, Flex, Image, Spacer } from "@chakra-ui/react";
 import { IoCalendarOutline } from "react-icons/io5";
+import { RiRobot3Line } from "react-icons/ri";
 import { BiHome } from "react-icons/bi";
+import { useRouter } from "next/router";
 const SidebarAI = () => {
     // Mock AI models
+    const router = useRouter();
     const aiModels = ["General AI", "HR Care", "Product Expert", "Market Expert"];
 
     // Mock chat history
@@ -15,114 +17,100 @@ const SidebarAI = () => {
 
     return (
         <Box
-            w={{ base: "full", md: "250px" }}
-            bg="gray.100"
-            p={6}
+            w={{ base: "full", md: "50px" }}
+            bg={"#2254C526"}
+            pt={4}
             minH="calc(100vh - 64px)"
+            boxShadow="2px 0 5px rgba(0, 0, 0, 0.4)"
         >
-            <VStack align="stretch" spacing={6}>
-                {/* AI Model Selection */}
-                {/* <Box>
-          <Text fontWeight="bold" mb={2}>AI Model</Text>
-          <Select placeholder="เลือก AI" size="sm">
-            {aiModels.map((model, i) => (
-              <option key={i} value={model}>{model}</option>
-            ))}
-          </Select>
-        </Box> */}
+            {/* 💡 เปลี่ยน VStack เป็น Flex container หลัก และกำหนด direction="column" */}
+            <Flex direction="column" h="calc(100vh - 64px)">
 
-                {/* New Chat Button */}
+                {/* 1. โลโก้ (อยู่ด้านบน) */}
                 <Flex
-                    flex="1" // 💡 1. ขยาย Flex ให้เต็มความกว้างที่เหลือ
                     align="center"
-                    justifyContent="center" // 💡 2. จัดวางเนื้อหา (ไอคอน) ให้อยู่ตรงกลางแนวนอน
+                    justifyContent="center"
+                >
+                    <Image
+                        src="/amai-icon.png"
+                        alt="AM AI Logo"
+                        boxSize="30px"
+                        maxH="30px"
+                        mb={4}
+                    />
+                </Flex>
+                
+                {/* 2. Spacer (ดันไอคอนไปอยู่กึ่งกลาง/ล่าง) */}
+                <Spacer />
+                
+                {/* 3. ไอคอน (อยู่กลางจอตามแนวตั้ง) */}
+                <VStack
+                    // flex="1" ถูกเอาออก และใช้ Spacer แทน
+                    align="center" // จัดให้อยู่ตรงกลางตามแนวนอน
+                    justifyContent="center" // ไม่จำเป็นต้องใช้ เพราะใช้ Spacer จัดตำแหน่งแล้ว
                     mb={4}
-                    gap={6}
-                // เพิ่มความกว้างขั้นต่ำ (minW) ถ้าจำเป็น เพื่อให้แน่ใจว่า Flex มีพื้นที่ให้ขยาย
-                // minW="100%" 
+                    gap={2}
+                    direction="column"
+                    // h={"100%"} ถูกเอาออก เพื่อให้ Spacer ทำงาน
                 >
                     <Box
-                        p={2} // Padding รอบไอคอน
-                        borderRadius="full" // ทำให้เป็นวงกลม
-                        transition="all 0.2s ease-in-out" // 💡 ทำให้การเปลี่ยนสีและเงาไหลลื่น
-                        cursor="pointer"
-                        // 🎨 Drop Shadow และสีปกติ
-                        boxShadow="md"
-                        bg="white"
-                        onClick={() => window.location.href = "/"}
+                        p={2}
+                        transition="all 0.2s ease-in-out"
+                        rounded={"full"}
+                        cursor={"pointer"}
+                        onClick={() => router.push("/")}
                         _hover={{
-                            // 💡 Hover Effects
-                            color: "purple.600", // เปลี่ยนสีไอคอนเป็นสีม่วง
-                            boxShadow: "lg", // ทำให้เงาเข้มขึ้น
-                            transform: "translateY(-2px)", // ยกไอคอนขึ้นเล็กน้อย
-                            bg: "blue.50", // พื้นหลังสีอ่อน
+                            transform: "translateY(-1px)",
+                            bg: "white",
+                            dropShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.4)",
                         }}
                     >
                         <BiHome
-                            size={32}
-                            color="#174376ff" // สีเริ่มต้นของไอคอน
-                        // 💡 **สำคัญ**: ลบ cursor="pointer" และ color ออกจาก Icon เพราะ Box จัดการแล้ว
+                            size={24}
+                            color="#5D5D5D"
                         />
                     </Box>
-
-                    {/* ไอคอน IoCalendarOutline */}
                     <Box
                         p={2}
-                        borderRadius="full"
                         transition="all 0.2s ease-in-out"
-                        cursor="pointer"
-                        // 🎨 Drop Shadow และสีปกติ
-                        boxShadow="md"
-                        bg="white"
-                        onClick={() => window.location.href = "/meeting-management"}
+                        rounded={"full"}
+                        cursor={"pointer"}
+                        onClick={() => router.push("/ai-assistant")}
                         _hover={{
-                            // 💡 Hover Effects
-                            color: "purple.600",
-                            boxShadow: "lg",
-                            transform: "translateY(-2px)",
-                            bg: "blue.50",
+                            transform: "translateY(-1px)",
+                            bg: "white",
+                            dropShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.4)",
+                        }}
+                    >
+                        <RiRobot3Line
+                            size={24}
+                            color="#5D5D5D"
+                        />
+                    </Box>
+                    <Box
+                        p={2}
+                        transition="all 0.2s ease-in-out"
+                        rounded={"full"}
+                        cursor={"pointer"}
+                        onClick={() => router.push("/meeting-management")}
+                        _hover={{
+                            transform: "translateY(-1px)",
+                            bg: "white",
+                            dropShadow: "0 4px 20px 0 rgba(59, 130, 246, 0.4)",
                         }}
                     >
                         <IoCalendarOutline
-                            size={32}
-                            color="#174376ff" // สีเริ่มต้นของไอคอน
+                            size={24}
+                            color="#5D5D5D"
                         />
                     </Box>
-                </Flex>
-                <Button bgGradient="linear(to-r, blue.800, purple.600)" transition="all 0.3s ease" _hover={{ bgGradient: "linear(to-r, blue.600, purple.400)" }} size="sm" w="full" textColor="white" onClick={() => window.location.href = "/ai-assistant"}>
-                    New Chat
-                </Button>
 
-                <Divider />
-                {/* Chat History */}
-                <Box>
-                    <Text fontWeight="bold" mb={2}>Chat History</Text>
-                    <VStack align="stretch" spacing={2} maxH="200px" overflowY="auto">
-                        {chatHistory.map(chat => (
-                            <Box
-                                key={chat.id}
-                                p={2}
-                                borderRadius="md"
-                                bg="white"
-                                boxShadow="sm"
-                                transition="all 0.3s ease"
-                                _hover={{
-                                    bgGradient: "linear(to-r, blue.600, purple.400)",
-                                    color: "white",
-                                }}
-                                cursor="pointer"
-                            >
-                                <Text fontWeight="bold" fontSize="sm">{chat.title}</Text>
-                                <Text fontSize="xs" noOfLines={1}>{chat.snippet}</Text>
-                            </Box>
-                        ))}
-                    </VStack>
-                </Box>
+                </VStack>
+                
+                {/* 4. Spacer (ดันไอคอนที่อยู่ตรงกลางขึ้นไปอยู่ตรงกลางจริงๆ) */}
+                <Spacer />
 
-                <Divider />
-
-
-            </VStack>
+            </Flex>
         </Box>
     );
 };
