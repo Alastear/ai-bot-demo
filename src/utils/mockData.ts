@@ -28,6 +28,7 @@ export const MOCK_ALL_PARTICIPANTS = [
   'Test',
   'วีระศักดิ์',
   'กรต',
+  'สมชาย'
 ];
 
 // ------------------- REAL SCHEDULE DATA (เพิ่ม Service Event ใหม่ในเดือน 12) -------------------
