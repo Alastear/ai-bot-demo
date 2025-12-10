@@ -33,7 +33,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
         if (!isWelcomeScreen && inputRef.current) {
             inputRef.current.focus();
         }
-    }, [isWelcomeScreen]);
+        // 👇 ใส่ dependency ว่าง เพื่อให้รันแค่ครั้งแรก
+    }, []);
 
     return (
         <HStack w="full" spacing={3} mx="auto">
@@ -55,7 +56,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                     isDisabled={isLoading}
 
                     // ✔ ปรับ autoFocus ป้องกันหลุดโฟกัส
-                    autoFocus={isWelcomeScreen && !isLoading}
+                    autoFocus={autoFocus}
                 />
                 <InputRightElement width="4.5rem">
                     <Button

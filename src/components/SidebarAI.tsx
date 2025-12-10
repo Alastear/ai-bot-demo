@@ -22,6 +22,7 @@ const SidebarAI = () => {
             pt={4}
             minH="calc(100vh - 64px)"
             boxShadow="2px 0 5px rgba(0, 0, 0, 0.4)"
+            zIndex={4}
         >
             {/* 💡 เปลี่ยน VStack เป็น Flex container หลัก และกำหนด direction="column" */}
             <Flex direction="column" h="calc(100vh - 64px)">

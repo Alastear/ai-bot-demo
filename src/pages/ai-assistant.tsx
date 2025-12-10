@@ -82,7 +82,7 @@ export default function Page2() {
                                 { title: "General AI", desc: "สอบถามเรื่องทั่วไป", link: "/ai-chat" },
                                 { title: "HR Care", desc: "ให้คำแนะนำเกี่ยวกับการดูแลพนักงาน และทรัพยากรบุคคล", link: "/ai-chat-hr" },
                                 { title: "Inventory Expert", desc: "ให้คำแนะนำเกี่ยวกับผลิตภัณฑ์ของคุณ", link: "/ai-chat-inventory" },
-                                { title: "Market Expert", desc: "ให้คำแนะนำเกี่ยวกับตลาดและการวิเคราะห์", link: "/ai-chat-sale" },
+                                { title: "Sale Expert", desc: "ให้คำแนะนำเกี่ยวกับตลาดและการวิเคราะห์", link: "/ai-chat-sale" },
                             ].map((item, i) => (
                                 <Box
                                     key={i}

@@ -32,7 +32,7 @@ const NavbarAI = () => {
     path.replace("/", "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <Flex align="center" bg="white" boxShadow="md">
+    <Flex align="center" boxShadow="md">
       <Box
         mt={4}
         px={4}
